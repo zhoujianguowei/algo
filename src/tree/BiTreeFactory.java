@@ -2,6 +2,9 @@ package tree;
 
 import com.bjzhou.assist.entity.Queue;
 import com.bjzhou.assist.utils.FileUtils;
+import com.sun.org.apache.xerces.internal.impl.dv.dtd.NMTOKENDatatypeValidator;
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tree.util.BiTreeUtil;
@@ -38,14 +41,14 @@ public class BiTreeFactory {
      * @param <T>
      * @return
      */
-    public <T> BiTree<T> constructBiTree(String strategy, String source) {
+    public <T> BiTree<T> constructBiTree(String strategy, String source, Class<T> parseType) {
         Objects.requireNonNull(strategy);
         Objects.requireNonNull(source);
         BiTree bt = null;
         switch (strategy) {
             case CONSTRUCT_STRATEGY_FILE:
                 try {
-                    bt = constructFromFile(source);
+                    bt = constructFromFile(source, parseType);
                 } catch (Exception e) {
                     e.printStackTrace();
                     LOGGER.error(e.getMessage(), e);
@@ -64,10 +67,11 @@ public class BiTreeFactory {
      *
      * @param sourcePath
      * @param <T>
-     * @return
+     * @param valType    {@link Node#val}的解析出来的数据类型，只支持基本数据类型解析和字符串类型
+     * @return 根节点
      * @throws Exception
      */
-    protected <T> BiTree<T> constructFromFile(String sourcePath) throws Exception {
+    protected <T> BiTree<T> constructFromFile(String sourcePath, Class<T> valType) throws Exception {
         FileUtils fileUtils = FileUtils.getInstance();
         File file = new File(sourcePath);
         if (!file.exists() || file.isDirectory()) {
@@ -76,6 +80,9 @@ public class BiTreeFactory {
         if (!file.canRead()) {
             LOGGER.error("当前文件：{}不可读", sourcePath);
             throw new IOException("当前文件不可读");
+        }
+        if (!valType.isAssignableFrom(String.class) && !Number.class.isAssignableFrom(valType)) {
+            throw new IllegalAccessException("解析数据只支持基本数据类型的封装类型");
         }
         String fileContent = fileUtils.extractFileContent(file, true);
         String[] nodes = fileContent.split("(\\s+|,)");
@@ -88,10 +95,15 @@ public class BiTreeFactory {
             if (val.equals(EMPTY_NODE_FLAG)) {
                 biTree = null;
             } else {
-                biTree.val = val;
+                if (valType.isAssignableFrom(String.class)) {
+                    biTree.val = val;
+                } else {
+                    biTree.val = parseStringValue(val, valType);
+                }
             }
             biTreeList.add(biTree);
         }
+
         /**
          * 构建二叉树的层次关系,设置左、右、父指针
          */
@@ -117,6 +129,33 @@ public class BiTreeFactory {
             }
         }
         return biTreeList.get(0);
+    }
+
+    private <T> T parseStringValue(String val, Class<T> parseType) throws Exception {
+        if (Number.class.isAssignableFrom(parseType)) {
+            throw new IllegalAccessException("转换的类型必须为数值型");
+        }
+        Double dbVal = Double.parseDouble(val);
+        if (parseType == Integer.class) {
+            return (T) new Integer(dbVal.intValue());
+        }
+        if (parseType == Double.class) {
+            return (T) new Double(dbVal.doubleValue());
+        }
+        if (parseType == Short.class) {
+            return (T) new Short(dbVal.shortValue());
+        }
+        if (parseType == Byte.class) {
+            return (T) new Byte(dbVal.byteValue());
+        }
+        if (parseType == Long.class) {
+            return (T) new Long(dbVal.longValue());
+        }
+        if (parseType == Float.class) {
+            return (T) new Float(dbVal.floatValue());
+        }
+        LOGGER.error("转换失败");
+        throw new Exception("转换失败");
     }
 
     /**
@@ -180,7 +219,7 @@ public class BiTreeFactory {
                     k--;
                 }
                 nextLevelBuilder = new StringBuilder();
-                for (int i= 0; i<=k; i++) {
+                for (int i = 0; i <= k; i++) {
                     nextLevelBuilder.append(sepArrays[i]).append(" ");
                 }
             }

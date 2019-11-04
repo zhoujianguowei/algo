@@ -17,7 +17,7 @@ public class TraverseBiThreeTest {
     @Before
     public void setUp() throws Exception {
         biTreeFactory = new BiTreeFactory();
-        bt = biTreeFactory.constructFromFile("src/bt.txt");
+        bt = biTreeFactory.constructFromFile("src/bt.txt",String.class);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package tree.util;
 
+import com.bjzhou.assist.entity.Page;
 import com.bjzhou.assist.entity.Queue;
 import com.bjzhou.assist.utils.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -29,6 +30,47 @@ public class BiTreeUtil {
         int leftDepth = getDepth(bt.left);
         int rightDepth = getDepth(bt.right);
         return Math.max(leftDepth, rightDepth) + 1;
+    }
+
+    /**
+     * 破坏完全二叉树之间的层次关系
+     *
+     * @param nums
+     * @param <T>
+     */
+    public static <T> void destroyBiTreeStructure(BiTree<T>[] nums) {
+        for (BiTree<T> num : nums) {
+            num.left = null;
+            num.right = null;
+            num.parent = null;
+        }
+    }
+
+    /**
+     * 完全二叉树构建树的层次结构
+     *
+     * @param nums
+     * @param <T>
+     */
+    public static <T> void constructBiTreeStructure(BiTree<T>[] nums) {
+        int length = nums.length;
+        for (int i = 0; i < length; i++) {
+            //构建孩子节点联系
+            int j = 2 * i + 1;
+            if (j < length) {
+                nums[i].left = nums[j];
+            }
+            j++;
+            //构建右孩子
+            if (j < length) {
+                nums[i].right = nums[j];
+            }
+            //构建父节点联系
+            if (i != 0) {
+                j = (i - 1) / 2;
+                nums[i].parent = nums[j];
+            }
+        }
     }
 
     /**

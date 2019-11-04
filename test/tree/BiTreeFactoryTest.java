@@ -18,7 +18,7 @@ public class BiTreeFactoryTest {
     @Before
     public void setUp() throws Exception {
         biTreeFactory = new BiTreeFactory();
-        bt = biTreeFactory.constructBiTree(BiTreeFactory.CONSTRUCT_STRATEGY_FILE, "src/bt.txt");
+        bt = biTreeFactory.constructBiTree(BiTreeFactory.CONSTRUCT_STRATEGY_FILE, "src/bt.txt", String.class);
     }
 
     @Test
