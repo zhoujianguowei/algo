@@ -19,7 +19,7 @@ import java.util.Set;
  输出例子1:
  abcqwer
  */
-public class Main {
+public class PrintStr {
     public static void main(String[] args) {
         Scanner scanner=new Scanner(System.in);
         while(scanner.hasNext()){

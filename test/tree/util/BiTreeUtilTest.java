@@ -3,14 +3,11 @@ package tree.util;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import sun.reflect.annotation.ExceptionProxy;
-import tree.BiTree;
+import tree.structure.BiTree;
 import tree.BiTreeFactory;
 import tree.Heap;
 
 import java.util.Random;
-
-import static org.junit.Assert.*;
 
 public class BiTreeUtilTest {
     BiTree<String> bt;

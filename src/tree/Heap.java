@@ -1,7 +1,5 @@
 package tree;
 
-import java.util.Comparator;
-
 /**
  * 堆算法的具体实现，该算法按照小顶堆的方式进行实现
  *
@@ -13,13 +11,14 @@ public class Heap<T extends Comparable> {
      * 向下调整完全二叉树（近似堆，只有节点i的值不满足小顶堆的定义），
      *
      * @param nums
-     * @param i
+     * @param i        不平衡的节点
+     * @param endIndex 调整的堆的最后一个元素的索引
      */
-    public void heapify_down(T[] nums, int i) {
+    public void putDownTree(T[] nums, int i, int endIndex) {
         int j = 2 * i + 1;
         //获取左右子树最小的那个节点
-        while (j < nums.length) {
-            if (j + 1 < nums.length) {
+        while (j <= endIndex) {
+            if (j + 1 <= endIndex) {
                 if (nums[j].compareTo(nums[j + 1]) > 0) {
                     j = j + 1;
                 }
@@ -44,7 +43,7 @@ public class Heap<T extends Comparable> {
      */
     public void constructSmallHeap(T[] nums) {
         for (int i = (nums.length - 2) / 2; i >= 0; i--) {
-            heapify_down(nums, i);
+            putDownTree(nums, i, nums.length - 1);
         }
     }
 }

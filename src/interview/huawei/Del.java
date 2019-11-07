@@ -20,7 +20,7 @@ import java.util.Scanner;
  输出例子1:
  6
  */
-public class DelNum {
+public class Del {
     public static void main(String[] args) {
         Scanner scanner=new Scanner(System.in);
         while(scanner.hasNext()) {

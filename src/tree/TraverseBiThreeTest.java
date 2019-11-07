@@ -2,12 +2,7 @@ package tree;
 
 import org.junit.Before;
 import org.junit.Test;
-import sun.reflect.annotation.ExceptionProxy;
-import tree.BiTree;
-import tree.BiTreeFactory;
-import tree.TraverseBiThree;
-
-import static org.junit.Assert.*;
+import tree.structure.BiTree;
 
 public class TraverseBiThreeTest {
 

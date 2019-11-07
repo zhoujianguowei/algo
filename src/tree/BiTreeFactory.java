@@ -2,11 +2,10 @@ package tree;
 
 import com.bjzhou.assist.entity.Queue;
 import com.bjzhou.assist.utils.FileUtils;
-import com.sun.org.apache.xerces.internal.impl.dv.dtd.NMTOKENDatatypeValidator;
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.lang.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tree.structure.BiTree;
+import tree.structure.Node;
 import tree.util.BiTreeUtil;
 
 import java.io.File;

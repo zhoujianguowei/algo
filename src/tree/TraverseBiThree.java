@@ -1,6 +1,7 @@
 package tree;
 
 import com.bjzhou.assist.entity.Queue;
+import tree.structure.BiTree;
 
 import java.util.Stack;
 

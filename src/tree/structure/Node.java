@@ -1,4 +1,4 @@
-package tree;
+package tree.structure;
 
 public abstract class Node<T> {
     public T val;

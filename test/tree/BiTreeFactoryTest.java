@@ -4,12 +4,9 @@ import com.bjzhou.assist.utils.FileUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import tree.BiTree;
-import tree.BiTreeFactory;
+import tree.structure.BiTree;
 
 import java.io.File;
-
-import static org.junit.Assert.*;
 
 public class BiTreeFactoryTest {
     BiTreeFactory biTreeFactory;

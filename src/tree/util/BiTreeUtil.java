@@ -1,10 +1,8 @@
 package tree.util;
 
-import com.bjzhou.assist.entity.Page;
 import com.bjzhou.assist.entity.Queue;
 import com.bjzhou.assist.utils.FileUtils;
-import org.apache.commons.lang.StringUtils;
-import tree.BiTree;
+import tree.structure.BiTree;
 
 /**
  * 二叉树工具类，比如打印二叉树

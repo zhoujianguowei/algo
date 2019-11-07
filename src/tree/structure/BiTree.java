@@ -4,7 +4,7 @@
  * @author bjzhou
  * @date 2019-11-03
  */
-package tree;
+package tree.structure;
 
 public class BiTree<T> extends Node implements Comparable<BiTree<T>> {
     /**
