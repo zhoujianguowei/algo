@@ -32,4 +32,10 @@ public class ComparableNode<T extends Comparable> extends Node implements Compar
             return val.compareTo(o.val);
         }
     }
+
+    @Override
+    public String toString() {
+//        return super.toString();
+        return val == null ? this.toString() : val.toString();
+    }
 }
