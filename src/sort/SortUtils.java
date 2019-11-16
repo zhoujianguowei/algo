@@ -1,15 +1,13 @@
 package sort;
 
 import com.bjzhou.assist.entity.Page;
+import org.assertj.core.api.ComparableAssert;
 import tree.Heap;
 import tree.structure.ComparableNode;
 import tree.structure.LinkNode;
 import tree.structure.QueNode;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * 排序算法具体实现：一共包括以下排序算法，
@@ -21,6 +19,8 @@ import java.util.Random;
  * 6.堆排序
  * 7.希尔排序
  * 8.基数排序
+ * 9.计数排序
+ * 10.桶排序
  */
 public class SortUtils {
     /**
@@ -263,7 +263,6 @@ public class SortUtils {
             nodes[i--] = resultQ.deq().getVal();
         }
     }
-
     /**
      * 基数排序的分配和收集过程代码实现
      *
@@ -274,7 +273,7 @@ public class SortUtils {
         //10个队列，表明是10进制形式的排序
         List<QueNode<ComparableNode<Integer>>> queNodeList = new ArrayList<>(10);
         for (int i = 0; i < 10; i++) {
-            queNodeList.add(new QueNode<>());
+            queNodeList.add(new QueNode<ComparableNode<Integer>>());
         }
         int ite = 0;
         while (true) {
@@ -308,7 +307,7 @@ public class SortUtils {
                 /**
                  * 需要将队列进行重置，不能清空（否则会破坏列表的链接关系）
                  */
-                queNodeList.set(i, new QueNode<>());
+                queNodeList.set(i, new QueNode<ComparableNode<Integer>>());
             }
             if (maxIndex == 0) {
                 break;
@@ -317,6 +316,93 @@ public class SortUtils {
         }
         return wq;
     }
+
+    /**
+     * 计数排序算法，基本思想：
+     * 计数排序不是一个基于比较的排序算法，是将元素的值与其所在数组索引位置进行关联的
+     * 一种算法，该算法的时间复杂度是O(n)，适用于数据范伟波动不大的数据。
+     * note:注意桶的范围的计算方式，以及桶的大小设置。（桶的数量越多，覆盖的范围越小，桶内排序代价越小）
+     * @param nodes
+     */
+    public static void countSort(ComparableNode<Integer>[] nodes) {
+        ComparableNode<Integer> lowerBound = nodes[0];
+        ComparableNode<Integer> upperBound = nodes[0];
+        for (ComparableNode<Integer> node : nodes) {
+            if (node.compareTo(lowerBound) < 0) {
+                lowerBound = node;
+            }
+            if (node.compareTo(upperBound) > 0) {
+                upperBound = node;
+            }
+        }
+        //计算所需的映射数组空间
+        ArrayList<ArrayList<ComparableNode<Integer>>> list = new ArrayList<>(upperBound.val - lowerBound.val + 1);
+        int lowerVal = lowerBound.val;
+        int upperVal = upperBound.val;
+        //初始化双重链表
+        for (int i = 0; i < upperVal - lowerVal + 1; i++) {
+            list.add(new ArrayList<ComparableNode<Integer>>());
+        }
+        for (ComparableNode<Integer> node : nodes) {
+            List<ComparableNode<Integer>> partition = list.get(node.val - lowerVal);
+            partition.add(node);
+        }
+        //将排好序的内容复制到数组中
+        int i = 0;
+        for (List<ComparableNode<Integer>> partition : list) {
+            if (!partition.isEmpty()) {
+                for (ComparableNode<Integer> node : partition) {
+                    nodes[i++] = node;
+                }
+            }
+        }
+    }
+
+    /**
+     * 桶排序，基本思想：
+     * 根据排序数据的范围，生成n+1个平均间隔的桶。然后根据排序元素的内容计算得到
+     * 元素在桶中的具体位置，最后对所有的桶进行排序。
+     * @param nodes
+     */
+    public static void bucketSort(ComparableNode<Integer>[] nodes){
+        int lowerVal=nodes[0].val,upperVal=lowerVal;
+        for(ComparableNode<Integer> node:nodes){
+            if(node.val<lowerVal){
+                lowerVal=node.val;
+            }
+            if(node.val>upperVal){
+                upperVal=node.val;
+            }
+        }
+        int bucketSize=nodes.length+1;
+        List<ArrayList<ComparableNode<Integer>>> bucketList=new ArrayList<>(bucketSize);
+        for(int i=0;i<bucketSize;i++){
+            bucketList.add(new ArrayList<ComparableNode<Integer>>());
+        }
+        //每个桶覆盖的数据范围(左闭右开)
+        float bucketWidth=(upperVal-lowerVal)*1.0f/nodes.length;
+        //将元素放到指定的桶里
+        for(ComparableNode<Integer> node:nodes){
+            int index= (int) ((node.val-lowerVal)/bucketWidth);
+            bucketList.get(index).add(node);
+        }
+        int j=0;
+        //对每个桶的元素进行排序
+        for(int i=0;i<bucketSize;i++){
+            List<ComparableNode<Integer>> bucket=bucketList.get(i);
+            if(!bucket.isEmpty()){
+                ComparableNode<Integer>[] ba=new ComparableNode[bucket.size()];
+                bucket.toArray(ba);
+                combineSort(ba,0,ba.length-1);
+                System.arraycopy(ba,0,nodes,j,bucket.size());
+//                bucket=Arrays.asList(ba);
+//                bucketList.set(i, (ArrayList<ComparableNode<Integer>>) bucket);
+            }
+            j+=bucket.size();
+        }
+
+    }
+
 
     /***
      * 交换数组中两个节点的位置
@@ -354,8 +440,11 @@ public class SortUtils {
         printArray(nodes, 0, nodes.length - 1);
     }
 
-    public static void main(String[] args) {
-        int n = 300000, lowerBound = -4000000, upperBound = 4000000;
+    /**
+     * 测试10中排序算法
+     */
+    public static void test() {
+        int n = 100000, lowerBound = -9999, upperBound =20000;
         int randomIndex = new Random().nextInt(n);
         ComparableNode refNode = null;
         ComparableNode[] nodes = generateRandomNode(n, lowerBound, upperBound);
@@ -408,22 +497,8 @@ public class SortUtils {
         printArray(copyNodes);
         System.out.println("");
 
-
-        //二路归并排序
-        copyNodes = Arrays.copyOf(nodes, n);
-        System.out.println("before combine sort");
-        printArray(copyNodes);
-        bench = System.currentTimeMillis();
-        combineSort(copyNodes, 0, n - 1);
-        System.out.println("after combine sort");
-        assert (refNode.compareTo(copyNodes[randomIndex]) == 0);
-        System.out.println("cost time:" + (System.currentTimeMillis() - bench) + "ms");
-        printArray(copyNodes);
-        System.out.println("");
-
-
-        //堆排序
-        copyNodes = Arrays.copyOf(nodes, n);
+//        //堆排序
+//        copyNodes = Arrays.copyOf(nodes, n);
         System.out.println("before heap sort");
         printArray(copyNodes);
         bench = System.currentTimeMillis();
@@ -459,6 +534,41 @@ public class SortUtils {
         printArray(copyNodes);
         System.out.println("");
 
+        //二路归并排序
+        copyNodes = Arrays.copyOf(nodes, n);
+        System.out.println("before combine sort");
+        printArray(copyNodes);
+        bench = System.currentTimeMillis();
+        combineSort(copyNodes, 0, n - 1);
+        System.out.println("after combine sort");
+        assert (refNode.compareTo(copyNodes[randomIndex]) == 0);
+        System.out.println("cost time:" + (System.currentTimeMillis() - bench) + "ms");
+        printArray(copyNodes);
+        System.out.println("");
+
+        //计数排序算法实现
+        System.out.println("count sort before");
+        copyNodes = Arrays.copyOf(nodes, n);
+        printArray(copyNodes);
+        bench = System.currentTimeMillis();
+        countSort(copyNodes);
+        assert refNode.compareTo(copyNodes[randomIndex]) == 0;
+        System.out.println("count sort after");
+        System.out.println("cost time:" + (System.currentTimeMillis() - bench) + "ms");
+        printArray(copyNodes);
+        System.out.println("");
+
+        //桶排序算法实现
+        System.out.println("bucket sort before");
+        copyNodes = Arrays.copyOf(nodes, n);
+        printArray(copyNodes);
+        bench = System.currentTimeMillis();
+        bucketSort(copyNodes);
+        assert refNode.compareTo(copyNodes[randomIndex]) == 0;
+        System.out.println("bucket sort after");
+        System.out.println("cost time:" + (System.currentTimeMillis() - bench) + "ms");
+        printArray(copyNodes);
+        System.out.println("");
 
         //系统自带的排序
         System.out.println("system sort before");
@@ -471,6 +581,46 @@ public class SortUtils {
         System.out.println("cost time:" + (System.currentTimeMillis() - bench) + "ms");
         printArray(copyNodes);
         System.out.println("");
+    }
+
+    public static void main(String[] args) {
+
+        test();
+//        int i = -4;
+//        System.out.printf("%-10d %32s\n", i, Integer.toBinaryString(i));
+//        i >>>= 1;  // 无符号右移1位
+//        System.out.printf("%-10d %32s\n", i, Integer.toBinaryString(i));
+//        i >>>= 1;
+//        System.out.printf("%-10d %32s\n", i, Integer.toBinaryString(i));
+        /*StringBuilder builderX=new StringBuilder("[");
+        StringBuilder builderY=new StringBuilder("[");
+        StringBuilder combineBuilderX=new StringBuilder("[");
+        StringBuilder combineBuilderY=new StringBuilder("[");
+        for(int i=0,k=10000;i<50;i++,k+=10000) {
+            System.out.println("排序"+k+"个数时间消耗");
+            //测试二路归并排序和基数排序
+            ComparableNode<Integer>[] nodes = generateRandomNode(k,-10000,10000);
+            ComparableNode<Integer>[] copyNodes=Arrays.copyOf(nodes,k);
+            long bench=System.currentTimeMillis();
+            combineSort(copyNodes,0,k-1);
+            System.out.println("二路归并时间:"+(System.currentTimeMillis()-bench));
+            combineBuilderX.append(k).append(" ");
+            combineBuilderY.append(System.currentTimeMillis()-bench).append(" ");
+            copyNodes=Arrays.copyOf(nodes,k);
+            bench=System.currentTimeMillis();
+            radixSort(nodes);
+            System.out.println("基数排序时间:"+(System.currentTimeMillis()-bench));
+            builderX.append(k).append(" ");
+            builderY.append(System.currentTimeMillis()-bench).append(" ");
+        }
+        builderX.append("];");
+        builderY.append("];");
+        combineBuilderX.append("];");
+        combineBuilderY.append("];");
+        System.out.println(builderX);
+        System.out.println(builderY);
+        System.out.println(combineBuilderX);
+        System.out.println(combineBuilderY);*/
     }
 }
 

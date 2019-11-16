@@ -6,7 +6,7 @@ import java.util.List;
 public class MemOverflow {
 
     public static void main(String[] args) {
-        int size = 1024 * 1024 * 1;
+        final int size = 1024 * 1024 * 1;
         List<byte[]> list = new ArrayList<byte[]>();
         Thread t1 = new Thread("t1") {
             @Override
