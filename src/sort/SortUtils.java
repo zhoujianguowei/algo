@@ -263,6 +263,7 @@ public class SortUtils {
             nodes[i--] = resultQ.deq().getVal();
         }
     }
+
     /**
      * 基数排序的分配和收集过程代码实现
      *
@@ -364,41 +365,41 @@ public class SortUtils {
      * 元素在桶中的具体位置，最后对所有的桶进行排序。
      * @param nodes
      */
-    public static void bucketSort(ComparableNode<Integer>[] nodes){
-        int lowerVal=nodes[0].val,upperVal=lowerVal;
-        for(ComparableNode<Integer> node:nodes){
-            if(node.val<lowerVal){
-                lowerVal=node.val;
+    public static void bucketSort(ComparableNode<Integer>[] nodes) {
+        int lowerVal = nodes[0].val, upperVal = lowerVal;
+        for (ComparableNode<Integer> node : nodes) {
+            if (node.val < lowerVal) {
+                lowerVal = node.val;
             }
-            if(node.val>upperVal){
-                upperVal=node.val;
+            if (node.val > upperVal) {
+                upperVal = node.val;
             }
         }
-        int bucketSize=nodes.length+1;
-        List<ArrayList<ComparableNode<Integer>>> bucketList=new ArrayList<>(bucketSize);
-        for(int i=0;i<bucketSize;i++){
+        int bucketSize = (int) Math.sqrt(nodes.length);
+        List<ArrayList<ComparableNode<Integer>>> bucketList = new ArrayList<>(bucketSize);
+        for (int i = 0; i < bucketSize; i++) {
             bucketList.add(new ArrayList<ComparableNode<Integer>>());
         }
         //每个桶覆盖的数据范围(左闭右开)
-        float bucketWidth=(upperVal-lowerVal)*1.0f/nodes.length;
+        float bucketWidth = (upperVal - lowerVal) * 1.0f / (bucketSize-1);
         //将元素放到指定的桶里
-        for(ComparableNode<Integer> node:nodes){
-            int index= (int) ((node.val-lowerVal)/bucketWidth);
+        for (ComparableNode<Integer> node : nodes) {
+            int index = (int) ((node.val - lowerVal) / bucketWidth);
             bucketList.get(index).add(node);
         }
-        int j=0;
+        int j = 0;
         //对每个桶的元素进行排序
-        for(int i=0;i<bucketSize;i++){
-            List<ComparableNode<Integer>> bucket=bucketList.get(i);
-            if(!bucket.isEmpty()){
-                ComparableNode<Integer>[] ba=new ComparableNode[bucket.size()];
+        for (int i = 0; i < bucketSize; i++) {
+            List<ComparableNode<Integer>> bucket = bucketList.get(i);
+            if (!bucket.isEmpty()) {
+                ComparableNode<Integer>[] ba = new ComparableNode[bucket.size()];
                 bucket.toArray(ba);
-                combineSort(ba,0,ba.length-1);
-                System.arraycopy(ba,0,nodes,j,bucket.size());
+                combineSort(ba, 0, ba.length - 1);
+                System.arraycopy(ba, 0, nodes, j, bucket.size());
 //                bucket=Arrays.asList(ba);
 //                bucketList.set(i, (ArrayList<ComparableNode<Integer>>) bucket);
             }
-            j+=bucket.size();
+            j += bucket.size();
         }
 
     }
@@ -444,95 +445,96 @@ public class SortUtils {
      * 测试10中排序算法
      */
     public static void test() {
-        int n = 100000, lowerBound = -9999, upperBound =20000;
+        int n = 1000000, lowerBound = -9999, upperBound = 20000;
         int randomIndex = new Random().nextInt(n);
         ComparableNode refNode = null;
         ComparableNode[] nodes = generateRandomNode(n, lowerBound, upperBound);
-        long bench = System.currentTimeMillis();
-        //直接插入排序
         ComparableNode[] copyNodes = Arrays.copyOf(nodes, n);
-        System.out.println("before insert sort");
-        printArray(copyNodes);
-        bench = System.currentTimeMillis();
-        insertSort(copyNodes);
-        refNode = copyNodes[randomIndex];
-        System.out.println("after insert sort");
-        System.out.println("cost time:" + (System.currentTimeMillis() - bench) + "ms");
-        printArray(copyNodes);
-        System.out.println("");
-
-        //选择排序
-        copyNodes = Arrays.copyOf(nodes, n);
-        System.out.println("before select sort");
-        printArray(copyNodes);
-        bench = System.currentTimeMillis();
-        selectSort(copyNodes);
-        assert (refNode.compareTo(copyNodes[randomIndex]) == 0);
-        System.out.println("after select sort");
-        System.out.println("cost time:" + (System.currentTimeMillis() - bench) + "ms");
-        printArray(copyNodes);
-        System.out.println("");
-
-        //冒泡排序
-        copyNodes = Arrays.copyOf(nodes, n);
-        System.out.println("before bubble sort");
-        printArray(copyNodes);
-        bench = System.currentTimeMillis();
-        bubbleSort(copyNodes);
-        assert (refNode.compareTo(copyNodes[randomIndex]) == 0);
-        System.out.println("after bubble sort");
-        System.out.println("cost time:" + (System.currentTimeMillis() - bench) + "ms");
-        printArray(copyNodes);
-        System.out.println("");
-
-        //快速排序
-        copyNodes = Arrays.copyOf(nodes, n);
-        System.out.println("before quick sort");
-        printArray(copyNodes);
-        bench = System.currentTimeMillis();
-        quickSort(copyNodes, 0, n - 1);
-        assert (refNode.compareTo(copyNodes[randomIndex]) == 0);
-        System.out.println("after quick sort");
-        System.out.println("cost time:" + (System.currentTimeMillis() - bench) + "ms");
-        printArray(copyNodes);
-        System.out.println("");
-
-//        //堆排序
-//        copyNodes = Arrays.copyOf(nodes, n);
+        long bench = System.currentTimeMillis();
+        //堆排序
         System.out.println("before heap sort");
         printArray(copyNodes);
         bench = System.currentTimeMillis();
         heapSort(copyNodes);
-        assert (refNode.compareTo(copyNodes[randomIndex]) == 0);
         System.out.println("after heap sort");
         System.out.println("cost time:" + (System.currentTimeMillis() - bench) + "ms");
+        refNode = copyNodes[randomIndex];
         printArray(copyNodes);
         System.out.println("");
 
-        //希尔排序
-        System.out.println("before shell sort");
-        copyNodes = Arrays.copyOf(nodes, n);
-        printArray(copyNodes);
-        int[] steps = new int[]{5, 3, 1};
-        bench = System.currentTimeMillis();
-        shellSort(copyNodes, steps);
-        assert (refNode.compareTo(copyNodes[randomIndex]) == 0);
-        System.out.println("after shell sort");
-        System.out.println("cost time:" + (System.currentTimeMillis() - bench) + "ms");
-        printArray(copyNodes);
-        System.out.println("");
-
-        //基数排序算法实现
-        System.out.println("radix sort before");
-        copyNodes = Arrays.copyOf(nodes, n);
-        printArray(copyNodes);
-        bench = System.currentTimeMillis();
-        radixSort(copyNodes);
-        assert refNode.compareTo(copyNodes[randomIndex]) == 0;
-        System.out.println("system sort after");
-        System.out.println("cost time:" + (System.currentTimeMillis() - bench) + "ms");
-        printArray(copyNodes);
-        System.out.println("");
+//        //直接插入排序
+//        copyNodes = Arrays.copyOf(nodes, n);
+//        System.out.println("before insert sort");
+//        printArray(copyNodes);
+//        bench = System.currentTimeMillis();
+//        insertSort(copyNodes);
+//        System.out.println("after insert sort");
+//        assert (refNode.compareTo(copyNodes[randomIndex]) == 0);
+//        System.out.println("cost time:" + (System.currentTimeMillis() - bench) + "ms");
+//        printArray(copyNodes);
+//        System.out.println("");
+//
+//        //选择排序
+//        copyNodes = Arrays.copyOf(nodes, n);
+//        System.out.println("before select sort");
+//        printArray(copyNodes);
+//        bench = System.currentTimeMillis();
+//        selectSort(copyNodes);
+//        assert (refNode.compareTo(copyNodes[randomIndex]) == 0);
+//        System.out.println("after select sort");
+//        System.out.println("cost time:" + (System.currentTimeMillis() - bench) + "ms");
+//        printArray(copyNodes);
+//        System.out.println("");
+//
+//        //冒泡排序
+//        copyNodes = Arrays.copyOf(nodes, n);
+//        System.out.println("before bubble sort");
+//        printArray(copyNodes);
+//        bench = System.currentTimeMillis();
+//        bubbleSort(copyNodes);
+//        assert (refNode.compareTo(copyNodes[randomIndex]) == 0);
+//        System.out.println("after bubble sort");
+//        System.out.println("cost time:" + (System.currentTimeMillis() - bench) + "ms");
+//        printArray(copyNodes);
+//        System.out.println("");
+//
+//        //快速排序
+//        copyNodes = Arrays.copyOf(nodes, n);
+//        System.out.println("before quick sort");
+//        printArray(copyNodes);
+//        bench = System.currentTimeMillis();
+//        quickSort(copyNodes, 0, n - 1);
+//        assert (refNode.compareTo(copyNodes[randomIndex]) == 0);
+//        System.out.println("after quick sort");
+//        System.out.println("cost time:" + (System.currentTimeMillis() - bench) + "ms");
+//        printArray(copyNodes);
+//        System.out.println("");
+//
+//
+//        //希尔排序
+//        System.out.println("before shell sort");
+//        copyNodes = Arrays.copyOf(nodes, n);
+//        printArray(copyNodes);
+//        int[] steps = new int[]{5, 3, 1};
+//        bench = System.currentTimeMillis();
+//        shellSort(copyNodes, steps);
+//        assert (refNode.compareTo(copyNodes[randomIndex]) == 0);
+//        System.out.println("after shell sort");
+//        System.out.println("cost time:" + (System.currentTimeMillis() - bench) + "ms");
+//        printArray(copyNodes);
+//        System.out.println("");
+//
+//        //基数排序算法实现
+//        System.out.println("radix sort before");
+//        copyNodes = Arrays.copyOf(nodes, n);
+//        printArray(copyNodes);
+//        bench = System.currentTimeMillis();
+//        radixSort(copyNodes);
+//        assert refNode.compareTo(copyNodes[randomIndex]) == 0;
+//        System.out.println("system sort after");
+//        System.out.println("cost time:" + (System.currentTimeMillis() - bench) + "ms");
+//        printArray(copyNodes);
+//        System.out.println("");
 
         //二路归并排序
         copyNodes = Arrays.copyOf(nodes, n);
@@ -582,10 +584,33 @@ public class SortUtils {
         printArray(copyNodes);
         System.out.println("");
     }
+    private static class DebugInfo{
+        public DebugInfo(){
+            System.out.println("debug test");
+        }
+
+        @Override
+        public String toString() {
+            return "DEBUG TO STRING";
+        }
+        public void printInfo(){
+            System.out.println("print debug info");
+        }
+    }
 
     public static void main(String[] args) {
+        LinkedHashMap<String,Integer> linkedHashMap=new LinkedHashMap<>();
+        linkedHashMap.put("hello",1);
+        linkedHashMap.put("good",2);
+        linkedHashMap.put("nid",4);
+        Set<Map.Entry<String,Integer>> set=linkedHashMap.entrySet();
+        Iterator<Map.Entry<String,Integer>> iterator= set.iterator();
+        while(iterator.hasNext()){
+            Map.Entry<String,Integer> entry=iterator.next();
+            System.out.println("key:"+entry.getKey()+",val:"+entry.getValue());
+        }
 
-        test();
+//        test();
 //        int i = -4;
 //        System.out.printf("%-10d %32s\n", i, Integer.toBinaryString(i));
 //        i >>>= 1;  // 无符号右移1位

@@ -31,6 +31,77 @@ public class BiTreeUtil {
     }
 
     /**
+     * 反转二叉树，即将二叉树的左右字树互换
+     * @param bt
+     * @param <T>
+     */
+    public static <T> void reverseBiTree(BiTree<T> bt) {
+        if (bt != null) {
+            BiTree<T> left = bt.left;
+            BiTree<T> right = bt.right;
+            BiTree<T> tmp = left;
+            bt.left = right;
+            bt.right = left;
+            reverseBiTree(bt.left);
+            reverseBiTree(bt.right);
+        }
+    }
+
+    /**
+     * 根据中序和后序遍历次序构建二叉树
+     * @param midOrder 中序
+     * @param i     中序左边界
+     * @param j     中序右边界
+     * @param postOrder 后序
+     * @param m
+     * @param n
+     * @param root 根节点 首次调用时候为null
+     * @param <T> 返回的是根节点的值
+     */
+    public static <T> BiTree<T> constructBiTreeByMidOrderPostOrder(BiTree<T>[] midOrder, int i, int j, BiTree<T>[] postOrder, int m, int n, BiTree<T> root) {
+        if (j - i != n - m || j < i) {
+            throw new IllegalArgumentException("参数错误");
+        }
+        //根节点
+        if (root == null) {
+            root = new BiTree<>();
+        }
+        if (i == j) {
+            root.val = midOrder[i].val;
+            return root;
+        }
+        root.val = postOrder[n].val;
+        //在中序遍历中找到根节点
+        int k = i;
+        while (k <= j && midOrder[k].compareTo(root) != 0) {
+            k++;
+        }
+        if(k>j){
+            throw  new IllegalArgumentException("无法构建二叉树，参数有误");
+        }
+        //说明没有左字树
+        if (k == i) {
+            BiTree<T> rightNode = new BiTree<>();
+            root.right = rightNode;
+            constructBiTreeByMidOrderPostOrder(midOrder, i + 1, j, postOrder, m, n - 1, rightNode);
+        }
+        //说明没有右字树
+        else if (k == j) {
+            BiTree<T> leftNode = new BiTree<>();
+            root.left = leftNode;
+            constructBiTreeByMidOrderPostOrder(midOrder, i, j - 1, postOrder, m, n - 1, leftNode);
+        } else {
+            BiTree<T> leftNode = new BiTree<>();
+            BiTree<T> rightNode = new BiTree<>();
+            root.left = leftNode;
+            root.right = rightNode;
+            constructBiTreeByMidOrderPostOrder(midOrder, i, k - 1, postOrder, m, m + k - i - 1, leftNode);
+            constructBiTreeByMidOrderPostOrder(midOrder, k + 1, j, postOrder, m + k - i, n - 1, rightNode);
+        }
+        return root;
+    }
+
+    /**
      * 破坏完全二叉树之间的层次关系
      *
      * @param nums

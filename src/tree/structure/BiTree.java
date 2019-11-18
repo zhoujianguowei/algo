@@ -18,6 +18,12 @@ public class BiTree<T> extends Node implements Comparable<BiTree<T>> {
      */
     public int location;
 
+    public BiTree(){
+
+    }
+    public BiTree(T val){
+        this.val=val;
+    }
     @Override
     public void visit() {
         System.out.println(val);
