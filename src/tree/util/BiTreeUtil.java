@@ -31,6 +31,90 @@ public class BiTreeUtil {
     }
 
     /**
+     * 构造二叉排序树
+     * @param nums
+     * @param <T>
+     * @return
+     */
+    public static <T> BiTree<T> constructBST(T[] nums) {
+        BiTree<T> root = null;
+        for (T num : nums) {
+            BiTree<T> biTree = new BiTree<>(num);
+            boolean[] found = new boolean[]{false};
+            BiTree<T> sbt;
+            //当前不存在根节点，创建根节点
+            if ((sbt = searchValInBST(biTree, root, null, found)) == null) {
+                root = new BiTree<>(num);
+            } else {
+                //只插入不重复的数据
+                if (!found[0]) {
+                    if (sbt.compareTo(biTree) > 0) {
+                        sbt.left = biTree;
+                    } else {
+                        sbt.right = biTree;
+                    }
+                }
+            }
+        }
+        return root;
+    }
+
+    /**
+     * 在二叉排序树中查找指定的值，如果值不存在，那么那么返回的是访问路径的前一个节点。否则返回当前节点
+     * @param target
+     * @param root
+     * @param pre
+     * @param  found 标志位，标识当前数据是否在bst中已经存在
+     * @param <T>
+     * @return
+     */
+    private static <T> BiTree<T> searchValInBST(final BiTree<T> target, BiTree<T> root, BiTree<T> pre, boolean[] found) {
+        if (root == null) {
+            if (pre != null) {
+                return pre;
+            } else {
+                //当前树是空的，无根节点
+                return null;
+            }
+        }
+        if (root.compareTo(target) == 0) {
+            found[0] = true;
+            return root;
+        } else if (root.compareTo(target) > 0) {
+            return searchValInBST(target, root.left, root, found);
+        } else {
+            return searchValInBST(target, root.right, root, found);
+        }
+    }
+
+
+    /**
+     * 测试当前树是否是二叉排序树。空树也是二叉排序树
+     * @param root
+     * @param pre 刚才访问的节点
+     * @param <T>
+     * @return
+     */
+    public static <T> boolean isBST(BiTree<T> root, BiTree<T> pre) {
+        if (root == null) {
+            return true;
+        }
+        if (!isBST(root.left, root)) {
+            return false;
+        }
+        if (pre != null) {
+            if (root.compareTo(pre) < 0) {
+                return false;
+            }
+        }
+        pre = root;
+        if (!isBST(pre.right, pre)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * 反转二叉树，即将二叉树的左右字树互换
      * @param bt
      * @param <T>
@@ -76,8 +160,8 @@ public class BiTreeUtil {
         while (k <= j && midOrder[k].compareTo(root) != 0) {
             k++;
         }
-        if(k>j){
-            throw  new IllegalArgumentException("无法构建二叉树，参数有误");
+        if (k > j) {
+            throw new IllegalArgumentException("无法构建二叉树，参数有误");
         }
         //说明没有左字树
         if (k == i) {

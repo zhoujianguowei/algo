@@ -11,6 +11,7 @@ import tree.Heap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
 
 public class BiTreeUtilTest {
     BiTree<String> bt;
@@ -85,6 +86,12 @@ public class BiTreeUtilTest {
         System.out.println("reverse after");
         BiTreeUtil.reverseBiTree(bt);
         System.out.println(BiTreeUtil.printBiTree(bt, 1));
+    }
+    @Test
+    public void constructBST() throws Exception{
+        Integer[] nums=new Integer[]{-12,-48,0,17,-12,-10,75,88,47,33,-29};
+        BiTree<Integer> root=BiTreeUtil.constructBST(nums);
+        System.out.println(BiTreeUtil.printBiTree(root,1));
     }
 
     @Test
