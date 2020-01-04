@@ -6,7 +6,7 @@
  */
 package tree.structure;
 
-public class BiTree<T> extends Node implements Comparable<BiTree<T>> {
+public class BiTree<T> extends Node implements Comparable<BiTree> {
     /**
      * 分别标识左、右以及父节点指针
      */
@@ -30,7 +30,7 @@ public class BiTree<T> extends Node implements Comparable<BiTree<T>> {
     }
 
     @Override
-    public int compareTo(BiTree<T> o) {
+    public int compareTo(BiTree o) {
         if (o == null) {
             return 1;
         } else {

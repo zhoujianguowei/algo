@@ -5,7 +5,8 @@ import com.bjzhou.assist.utils.FileUtils;
 import tree.structure.BiTree;
 
 /**
- * 二叉树工具类，比如打印二叉树
+ * 二叉树工具类，比如打印二叉树，构建二叉排序树，
+ * 二叉排序树节点查找等
  *
  * @author bjzhou
  * @date 2019-11-04
@@ -303,6 +304,4 @@ public class BiTreeUtil {
         }
         return builder;
     }
-
-
 }
