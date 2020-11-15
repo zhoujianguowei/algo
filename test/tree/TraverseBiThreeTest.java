@@ -12,7 +12,7 @@ public class TraverseBiThreeTest {
     @Before
     public void setUp() throws Exception {
         biTreeFactory = new BiTreeFactory();
-        bt = biTreeFactory.constructFromFile("src/bt.txt",String.class);
+        bt = biTreeFactory.constructFromFile("src/bt.txt", String.class);
     }
 
     @Test
@@ -24,20 +24,24 @@ public class TraverseBiThreeTest {
     public void LDR_ITERATIVE() throws Exception {
         TraverseBiThree.LDR_ITERATIVE(bt);
     }
+
     @Test
-    public void DLR_RECURSIVE() throws Exception{
+    public void DLR_RECURSIVE() throws Exception {
         TraverseBiThree.DLR_RECURSIVE(bt);
     }
+
     @Test
-    public void LRD_RECURSIVE() throws Exception{
+    public void LRD_RECURSIVE() throws Exception {
         TraverseBiThree.LRD_RECURSIVE(bt);
     }
+
     @Test
-    public void LRD_ITERATIVE() throws Exception{
+    public void LRD_ITERATIVE() throws Exception {
         TraverseBiThree.LRD_ITERATIVE(bt);
     }
+
     @Test
-    public void level() throws Exception{
+    public void level() throws Exception {
         TraverseBiThree.level(bt);
     }
 
