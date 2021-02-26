@@ -1,13 +1,18 @@
 package sort;
 
-import com.bjzhou.assist.entity.Page;
-import org.assertj.core.api.ComparableAssert;
 import tree.Heap;
 import tree.structure.ComparableNode;
 import tree.structure.LinkNode;
 import tree.structure.QueNode;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 /**
  * 排序算法具体实现：一共包括以下排序算法，
@@ -25,8 +30,8 @@ import java.util.*;
 public class SortUtils {
     /**
      * 直接插入排序，基本思想：
-     * 将序列分成两个部分，一部分是有序序列，另一个是无须序列，排序的过程就是将无序序列中的节点
-     * 逐步添加到有序序列中。
+     * 将序列分成两个部分，一部分是有序序列，另一个是无序序列，排序的过程就是将无序序列中的节点
+     * 逐步添加到有序序列中，最后形成一个有序序列
      *
      * @param nodes
      */
@@ -34,14 +39,12 @@ public class SortUtils {
         int i, j;
         for (i = 1; i < nodes.length; i++) {
             ComparableNode tmpNode = nodes[i];
-            if (tmpNode.compareTo(nodes[i - 1]) < 0) {
-                j = i - 1;
-                while (j >= 0 && tmpNode.compareTo(nodes[j]) < 0) {
-                    nodes[j + 1] = nodes[j];
-                    j--;
-                }
-                nodes[j + 1] = tmpNode;
+            j = i - 1;
+            while (j >= 0 && tmpNode.compareTo(nodes[j]) < 0) {
+                nodes[j + 1] = nodes[j];
+                j--;
             }
+            nodes[j + 1] = tmpNode;
         }
     }
 
@@ -56,14 +59,16 @@ public class SortUtils {
         int i, j;
         for (i = 0; i < length - 1; i++) {
             int minIndex = i;
-            for (j = i; j < length; j++) {
+            for (j = i + 1; j < length; j++) {
                 if (nodes[minIndex].compareTo(nodes[j]) > 0) {
                     minIndex = j;
                 }
             }
-            ComparableNode tmpNode = nodes[i];
-            nodes[i] = nodes[minIndex];
-            nodes[minIndex] = tmpNode;
+            if (minIndex != i) {
+                ComparableNode tmpNode = nodes[i];
+                nodes[i] = nodes[minIndex];
+                nodes[minIndex] = tmpNode;
+            }
         }
     }
 
@@ -111,8 +116,8 @@ public class SortUtils {
         int left = i - 1;
         Random random = new Random();
         /**
-         * 种子是随机选择的,由于在迭代的过程中，种子所在索引可能会被覆盖。所以需要在迭代过策划那个中
-         * 动态确定种子所在索引的位置。
+         * 种子是随机选择的,由于在迭代的过程中，种子所在索引可能会被覆盖。所以需要在迭代过程中
+         * 记录确定种子所在索引最后的位置。
          */
         int seedIndex = i + random.nextInt(j - i + 1);
         ComparableNode seed = nodes[seedIndex];
@@ -120,7 +125,7 @@ public class SortUtils {
             if (nodes[k].compareTo(seed) <= 0) {
                 left++;
                 swapNodes(nodes, k, left);
-                //确定种子的
+                //记录种子所在的索引位置
                 if (nodes[left].compareTo(seed) == 0) {
                     seedIndex = left;
                 }
@@ -203,20 +208,19 @@ public class SortUtils {
         assert stepLength > 0 && steps[stepLength - 1] == 1 : "最后一个步长必须是1";
         int i, j;
         for (i = 0; i < stepLength; i++) {
-            int di = steps[i];
-            for (j = 0; j < di; j++) {
-                int k = di + j;
+            int step = steps[i];
+            for (j = 0; j < step; j++) {
+                int k = step + j;
+                //内层循环是一个直接插入排序，调整的序列是{j,step+j,2*step+j,3*step+j...}
                 while (k < n) {
-                    if (k < n && nodes[k].compareTo(nodes[k - di]) < 0) {
-                        int m = k - di;
-                        ComparableNode tmpNode = nodes[k];
-                        while (m >= j && tmpNode.compareTo(nodes[m]) < 0) {
-                            nodes[m + di] = nodes[m];
-                            m -= di;
-                        }
-                        nodes[m + di] = tmpNode;
+                    int m = k - step;
+                    ComparableNode tmpNode = nodes[k];
+                    while (m >= j && tmpNode.compareTo(nodes[m]) < 0) {
+                        nodes[m + step] = nodes[m];
+                        m -= step;
                     }
-                    k += di;
+                    nodes[m + step] = tmpNode;
+                    k += step;
                 }
             }
         }
@@ -229,8 +233,10 @@ public class SortUtils {
      * 基本排序是一种非比较的排序算法，针对于多个关键词进行排序。每一轮迭代是针对于特定位置的关键字进行排序，
      * 一轮迭代过程主要包括两个步骤：分配和收集。
      * 分配：按照该轮迭代的关键词进行排序后，将其中元素放到指定的队列中，队列的个数就是基数r(整型的十进制就是10)。
-     * 收集：分配完成之后，将分配后的所有队列连接起来，形成下一轮的输入序列。
-     * 如此往复，直到最后一轮，迭代结束。算法复杂度是O(r(n+d)),其中r是迭代的次数，对于整型来说就是最大值的位数。
+     * 收集：分配完成之后，将分配后的所有队列连接起来，形成下一轮的输入序列。(r个队列从队头开始连接)
+     * 如此往复，直到最后一轮，迭代结束。算法时间复杂度是O(d(n+r)),其中d是最外层迭代的次数，就是最大的数值的十进制位的个数，n表示
+     * 的是排序的数的个数，r表示队列的个数，其实就是进制（10进制就是10）。
+     * LSD排序实现，即最低有效位优先，按照从小到大的顺序。高位大的放在后面
      * @param nodes
      */
     public static void radixSort(ComparableNode<Integer>[] nodes) {
@@ -250,13 +256,15 @@ public class SortUtils {
                 negCnt++;
             }
         }
+        //先进行非负数的排序
         QueNode<ComparableNode<Integer>> resultQ = doRadixSort(nonNegWq);
-        //将数据元素复制到数组中去,对于非负数是从小到大排列
+        //将数据元素复制到数组中去,对于非负数是从小到大排列，确定非负数的起始位置
         i = nodes.length - nonNegCnt;
+
         while (!resultQ.isEmpty()) {
             nodes[i++] = resultQ.deq().getVal();
         }
-        //对于负数，则是从大到小排列
+        //对于负数，则是从大到小排列（因为连同符号）
         resultQ = doRadixSort(negWq);
         i = negCnt - 1;
         while (!resultQ.isEmpty()) {
@@ -278,6 +286,7 @@ public class SortUtils {
         }
         int ite = 0;
         while (true) {
+            //表示终止条件
             int maxIndex = 0;
             /**
              * 分配
@@ -291,7 +300,7 @@ public class SortUtils {
                 maxIndex = Math.max(maxIndex, index);
             }
             /**
-             * 收集
+             * 收集，将队列串联起来，从对头串联到队尾
              */
             for (int i = 0; i < queNodeList.size(); i++) {
                 QueNode<ComparableNode<Integer>> queNode = queNodeList.get(i);
@@ -321,8 +330,9 @@ public class SortUtils {
     /**
      * 计数排序算法，基本思想：
      * 计数排序不是一个基于比较的排序算法，是将元素的值与其所在数组索引位置进行关联的
-     * 一种算法，该算法的时间复杂度是O(n)，适用于数据范伟波动不大的数据。
+     * 一种算法，该算法的时间复杂度是O(n)，适用于数据范围波动不大的数据。
      * note:注意桶的范围的计算方式，以及桶的大小设置。（桶的数量越多，覆盖的范围越小，桶内排序代价越小）
+     *
      * @param nodes
      */
     public static void countSort(ComparableNode<Integer>[] nodes) {
@@ -363,6 +373,7 @@ public class SortUtils {
      * 桶排序，基本思想：
      * 根据排序数据的范围，生成n+1个平均间隔的桶。然后根据排序元素的内容计算得到
      * 元素在桶中的具体位置，最后对所有的桶进行排序。
+     *
      * @param nodes
      */
     public static void bucketSort(ComparableNode<Integer>[] nodes) {
@@ -375,13 +386,16 @@ public class SortUtils {
                 upperVal = node.val;
             }
         }
+        if (nodes.length < 2) {
+            return;
+        }
         int bucketSize = (int) Math.sqrt(nodes.length);
         List<ArrayList<ComparableNode<Integer>>> bucketList = new ArrayList<>(bucketSize);
         for (int i = 0; i < bucketSize; i++) {
             bucketList.add(new ArrayList<ComparableNode<Integer>>());
         }
-        //每个桶覆盖的数据范围(左闭右开)
-        float bucketWidth = (upperVal - lowerVal) * 1.0f / (bucketSize-1);
+        //每个桶覆盖的数据范围(左闭右开)，确保桶能够覆盖所有数据
+        float bucketWidth = (upperVal - lowerVal) * 1.0f / (bucketSize - 1);
         //将元素放到指定的桶里
         for (ComparableNode<Integer> node : nodes) {
             int index = (int) ((node.val - lowerVal) / bucketWidth);
@@ -396,8 +410,6 @@ public class SortUtils {
                 bucket.toArray(ba);
                 combineSort(ba, 0, ba.length - 1);
                 System.arraycopy(ba, 0, nodes, j, bucket.size());
-//                bucket=Arrays.asList(ba);
-//                bucketList.set(i, (ArrayList<ComparableNode<Integer>>) bucket);
             }
             j += bucket.size();
         }
@@ -584,8 +596,9 @@ public class SortUtils {
         printArray(copyNodes);
         System.out.println("");
     }
-    private static class DebugInfo{
-        public DebugInfo(){
+
+    private static class DebugInfo {
+        public DebugInfo() {
             System.out.println("debug test");
         }
 
@@ -593,21 +606,22 @@ public class SortUtils {
         public String toString() {
             return "DEBUG TO STRING";
         }
-        public void printInfo(){
+
+        public void printInfo() {
             System.out.println("print debug info");
         }
     }
 
     public static void main(String[] args) {
-        LinkedHashMap<String,Integer> linkedHashMap=new LinkedHashMap<>();
-        linkedHashMap.put("hello",1);
-        linkedHashMap.put("good",2);
-        linkedHashMap.put("nid",4);
-        Set<Map.Entry<String,Integer>> set=linkedHashMap.entrySet();
-        Iterator<Map.Entry<String,Integer>> iterator= set.iterator();
-        while(iterator.hasNext()){
-            Map.Entry<String,Integer> entry=iterator.next();
-            System.out.println("key:"+entry.getKey()+",val:"+entry.getValue());
+        LinkedHashMap<String, Integer> linkedHashMap = new LinkedHashMap<>();
+        linkedHashMap.put("hello", 1);
+        linkedHashMap.put("good", 2);
+        linkedHashMap.put("nid", 4);
+        Set<Map.Entry<String, Integer>> set = linkedHashMap.entrySet();
+        Iterator<Map.Entry<String, Integer>> iterator = set.iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, Integer> entry = iterator.next();
+            System.out.println("key:" + entry.getKey() + ",val:" + entry.getValue());
         }
 
 //        test();

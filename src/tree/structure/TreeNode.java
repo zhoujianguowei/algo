@@ -28,7 +28,7 @@ public class TreeNode<T> extends Node implements Comparable<TreeNode> {
         if (o == null) {
             return -1;
         }
-        if (this.val != null && o.val == null) {
+        if (this.val != null && o.val != null) {
             Class<?> cls = this.val.getClass();
             if (Comparable.class.isAssignableFrom(cls)) {
                 return ((Comparable) this.val).compareTo(o.val);
